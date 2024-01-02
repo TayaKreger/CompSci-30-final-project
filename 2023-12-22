@@ -1,0 +1,150 @@
+// Taya Kreger 
+// farm Simulator 
+
+// states of the game 
+let game = 'start'; 
+// size of the character 
+let squareSize = 100;
+// speed of the character 
+let speed = 2;
+
+// load the character image 
+function preload() {
+  // farmer character image
+  crop = loadImage('crop.png')
+  scroll = loadImage('instruction.png');
+  dirt = loadImage('dirt.png');
+  littleFarmerF = loadImage('farmer.png'); 
+  littleFarmerL = loadImage('farmerL.png');
+  littleFarmerR = loadImage('farmerR.png');
+  littleFarmerB = loadImage('farmerB.png');
+  displayFarmer = littleFarmerF;
+  grassBg = loadImage('grassBg.png');
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  x = windowWidth/2;
+  // spawn point y
+  y = windowWidth/2;
+  // start button
+  startButton();
+  // information button
+  infoButton();
+}
+
+function draw() {
+  background(grassBg);
+  // game conditions
+  if (game === 'start') {
+    startPage();
+  }if (game === 'playing') {
+    crops();
+    bounds()
+    wasd();
+    farmer(); 
+  }if (game === 'info') {
+     infoPage();
+  }
+}
+
+
+
+// the start button
+function startButton(){
+  buttonS = createButton('Start');
+  buttonS.style("font-size", "32px");
+  buttonS.style("font-weight", "bold"); 
+  buttonS.size(200, 50);
+  buttonS.position(windowWidth / 2.6, windowHeight / 2);
+  buttonS.mousePressed(start);
+}
+// information 
+function infoButton() {
+  buttonI = createButton('How to play');
+  buttonI.style("font-size", "32px");
+  buttonI.style("font-weight", "bold"); 
+  buttonI.size(200, 50);
+  buttonI.position(windowWidth / 2.6, windowHeight / 1.7);
+  buttonI.mousePressed(infoPage);
+}
+
+// information page
+function infoPage(){
+  game = 'info';
+  buttonI.remove();
+  buttonS.position(windowWidth / 1.7, windowHeight / 1.23);
+  image(scroll, -windowWidth/6, -windowHeight/9, windowWidth + windowWidth/3, windowHeight*1.2);
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Instructions', width / 2, height / 8);
+  textSize(windowWidth/40);
+  text('Use WASD or the arrow keys to control your character', width / 2, height / 3.5);
+}
+// starting 
+function startPage() {
+  // startig text 
+  textAlign(CENTER);
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Welcome! Click "Start" to play', width / 2, height / 2 - 50);
+} 
+
+function crops() {
+  image(dirt, width/1.7, width/15, width/2.5, width/2.5); 
+  if (x > width/1.7 && x < width/1.7 + width / 2.5 && y > width / 15 && y < width / 15 + width / 2.5) {
+    if (key === 'c') {
+      image(crop, x, y, squareSize, squareSize); 
+    }
+  }
+}
+
+
+// start the game 
+function start() {
+  // Change game state to 'playing' when Start button is clicked
+  game = 'playing';
+  buttonS.remove(); 
+  buttonI.remove();
+}
+// playing 
+function farmer() {
+  image(displayFarmer, x, y, squareSize, squareSize); 
+}
+
+// movement 
+function wasd() {
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
+    y -= speed;
+    displayFarmer = littleFarmerB;
+  }if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
+    y += speed;
+    displayFarmer = littleFarmerF;
+  }if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+    x -= speed;
+    displayFarmer = littleFarmerL;
+  }if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+    x += speed;
+    displayFarmer = littleFarmerR;
+  }
+}
+// boundaries
+function bounds() {
+  if (x < 1){
+    x = 1
+  }if (x > windowWidth - squareSize ){
+    x = windowWidth - squareSize
+  }if (y < 1){
+    y = 1
+  }if (y > windowHeight - squareSize ){
+    y = windowHeight - squareSize
+  }
+}
+
+
+
+
+
+
