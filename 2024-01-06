@@ -1,0 +1,236 @@
+// farm Simulator
+let sel;
+let money = 0;
+let timer = 30;
+// states of the game 
+let game = 'start'; 
+// size of the character 
+let squareSize = 100;
+// speed of the character 
+let speed = 2;
+// the array of cropss
+let cropsArray = [];
+// load the character image 
+function preload() {
+  // animals
+  chicken = loadImage('chicken.png'); 
+  pig = loadImage('pig.png'); 
+  cow = loadImage('cow.png'); 
+  
+  truck = loadImage('truck.png'); 
+  house = loadImage('house.png'); 
+  // animal fence
+  pen = loadImage('farmfence.png')
+  // crops
+  crop = loadImage('crop.png');
+  // page on info page
+  scroll = loadImage('instruction.png');
+  // dirt patch
+  dirt = loadImage('dirt.png');
+  // farmers angles
+  littleFarmerF = loadImage('farmer.png'); 
+  littleFarmerL = loadImage('farmerL.png');
+  littleFarmerR = loadImage('farmerR.png');
+  littleFarmerB = loadImage('farmerB.png');
+  displayFarmer = littleFarmerF;
+  // grass backgroud
+  grassBg = loadImage('grassBg.png');
+}
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  // spawn point x
+  x = windowWidth/2;
+  // spawn point y
+  y = windowWidth/2;
+  // start button
+  startButton();
+  // information button
+  infoButton();
+}
+let ranch;
+
+function draw() {
+  background(grassBg);
+  // game conditions
+  if (game === 'start') {
+    startPage();
+  }if (game === 'playing') {
+   // if (sel) {
+     // sel.remove();
+    //}
+    updateTimers();
+    dollas()
+    penn()
+    keyReleased();
+    movement(); 
+    for (let i = 0; i < cropsArray.length; i++) {
+      let cropPos = cropsArray[i];
+      image(crop, cropPos.x, cropPos.y, squareSize, squareSize);
+    }
+  }if (game === 'info') {
+    infoPage();
+  }if (game === 'shop') {
+    shopPage();
+    backButton();
+    
+  }if (game === ranch) {
+    
+  }
+}
+
+// the start button
+function startButton(){
+  buttonS = createButton('Start');
+  buttonS.style("font-size", "32px");
+  buttonS.style("font-weight", "bold"); 
+  buttonS.size(200, 50);
+  buttonS.position(windowWidth / 2.6, windowHeight / 2);
+  buttonS.mousePressed(start);
+}
+function infoButton() {
+  buttonI = createButton('How to play');
+  buttonI.style("font-size", "32px");
+  buttonI.style("font-weight", "bold"); 
+  buttonI.size(200, 50);
+  buttonI.position(windowWidth / 2.6, windowHeight / 1.7);
+  buttonI.mousePressed(infoPage);
+}
+function backButton(){
+  buttonS.mousePressed(game = 'playing'); 
+}
+function animalButton() {
+    sel = createSelect();
+    sel.position(windowWidth/2.5, windowHeight/2);
+    sel.option('chicken');
+    sel.option('pig');
+    sel.option('cow');
+    sel.style('background-color', 'orange');
+    sel.style('border-radius', '3px');
+    sel.style('width', '200px');
+    sel.style('padding', '0.5em');
+  if (sel.selected === 'chicken') {
+    image(chicken, windowWidth/3.2, windowHeight/12.6, windowWidth/2.7, windowHeight/3.5);
+  }
+}
+function infoPage(){
+  game = 'info';
+  buttonI.remove();
+  buttonS.position(windowWidth / 1.7, windowHeight / 1.23);
+  image(scroll, -windowWidth/6, -windowHeight/9, windowWidth + windowWidth/3, windowHeight*1.2);
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Instructions', width / 2, height / 8);
+  textSize(windowWidth/40);
+  text('Use WASD or the arrow keys to control your character', width / 2, height / 3.5);
+  text('To plant crops stand on the dirt patch and press "c"', width / 2, height / 3);
+}
+function startPage() {
+  // startig text 
+  textAlign(CENTER);
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Welcome! Click "Start" to play', width / 2, height / 2 - 50);
+} 
+function shopPage() {
+  image(scroll, -windowWidth/6, -windowHeight/9, windowWidth + windowWidth/3, windowHeight*1.2);
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Shop', width / 2, height / 8);
+  textSize(windowWidth/40);
+  text('chicken : 250', width / 2, height / 3.5);
+  text('pig : 500', width / 2, height / 3);
+  text('cow : 1000', width / 2, height / 2.6);
+  animalButton();
+}
+function start() {
+  // Change game state to 'playing' when Start button is clicked
+  game = 'playing';
+  buttonS.remove(); 
+  buttonI.remove();
+}
+
+function dollas() {
+  textSize(windowWidth/20);
+  text('$' + money,windowWidth/5, windowHeight/15);
+}
+
+//https://editor.p5js.org/marynotari/sketches/S1T2ZTMp- 
+function updateTimers() {
+  if (cropsArray.length > 0) {
+    text(timer, width / 2.3, height / 1.6);
+    if (frameCount % 60 === 0 && timer > 0) {
+      timer--;
+    }
+    if (timer === 0) {
+        text("Crops ready", width / 6, height / 1.8);
+    }
+  }
+}
+function removeCrops() {
+  if (timer === 0) {
+    for (let i = cropsArray.length - 1; i >= 0; i--) {
+      cropsArray.splice(i); 
+      money = int(money + 2);
+      timer = 30;
+    }
+  }
+}
+function keyReleased() {
+  image(dirt, 0, height/1.7, width / 2.5, height / 2.5);
+  if (key === 'c' || key === 'C') {
+    if (x > 0 && x < width / 3 && y > windowWidth/2) {
+      let cropPos = { x: x, y: y };
+      cropsArray.push(cropPos);
+    }
+  }
+  if (x > 0 && x < width / 3 && y > windowWidth/2) {
+    if (key === 'v' || key === 'V') {
+      removeCrops();
+    }
+  }
+}
+
+
+function penn() {
+  image(pen, windowWidth/3.2, windowHeight/12.6, windowWidth/2.7, windowHeight/3.5);
+  image(pen, 0, windowHeight/12.6, windowWidth/2.7, windowHeight/3.5);
+  image(house, windowWidth/1.6, 1, windowWidth/2.7, windowHeight/2.7);
+  if (y < windowHeight/2.5 - squareSize ) {
+      y = windowHeight/2.5 - squareSize;
+  }
+  if (x > windowWidth/1.5 && x < windowWidth/1.2 && y < windowHeight/2.4 - squareSize  ) {
+    game = 'shop'
+  }
+}
+
+function movement() {
+  // farmers image
+  image(displayFarmer, x, y, squareSize, squareSize); 
+  // changes the farmers image anf direction based on what key is pressed 
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
+    y -= speed;
+    displayFarmer = littleFarmerB;
+  }if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
+    y += speed;
+    displayFarmer = littleFarmerF;
+  }if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+    x -= speed;
+    displayFarmer = littleFarmerL;
+  }if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+    x += speed;
+    displayFarmer = littleFarmerR;
+  }
+  // the bouds of the farmer so the character does not go off screen 
+  if (x < 1){
+    x = 1
+  }if (x > windowWidth - squareSize ){
+    x = windowWidth - squareSize
+  }if (y < 1){
+    y = 1
+  }if (y > windowHeight - squareSize ){
+    y = windowHeight - squareSize
+  }
+}
