@@ -312,7 +312,6 @@ function movement() {
 }
 
 
-// eat my shit you silly littlle cannibal
 
 class Chicken {
   constructor() {
