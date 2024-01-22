@@ -1,0 +1,513 @@
+// farm Simulator
+// fish count
+let fishes = [];
+// chicken count
+let Chickens = [];
+// pig count
+let Pigs = [];
+// crop count
+let cropsArray = [];
+// checks if the chicken button was pressed
+let chickenCheck = false;
+// checks if the pig button was pressed
+let pigCheck = false;
+// the fish shack 
+let fishShack;
+// money start
+let money = 100000000;
+// length of timer
+let timer = 30;
+// speed of the character 
+let speed = 5;
+// different states of the game
+let playing;
+let info;
+let ranch;
+// states the game 
+let game = 'start'; 
+
+// load the character image 
+function preload() {
+  redFishy = loadImage('redFishy.png');
+  doc = loadImage('doc.png');
+  rod = loadImage('rod.png'); 
+  pond = loadImage('pond.png'); 
+  shack = loadImage('shack.png'); 
+  chicken = loadImage('chicken.png'); 
+  pig = loadImage('pig.png'); 
+  cow = loadImage('cow.png'); 
+  truck = loadImage('truck.png'); 
+  house = loadImage('house.png'); 
+  pen = loadImage('farmfence.png')
+  crop = loadImage('crop.png');
+  scroll = loadImage('instruction.png');
+  dirt = loadImage('dirt.png');
+  littleFarmerF = loadImage('farmer.png'); 
+  littleFarmerL = loadImage('farmerL.png');
+  littleFarmerR = loadImage('farmerR.png');
+  littleFarmerB = loadImage('farmerB.png');
+  displayFarmer = littleFarmerF;
+  grassBg = loadImage('grassBg.png');
+}
+
+// sets up the game
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  // size of the character 
+  squareSize = windowHeight/7;
+  // spawn point x
+  x = windowWidth/2;
+  // spawn point y
+  y = windowWidth/2;
+  // start button
+  startButton();
+  // information button
+  infoButton();
+  
+  // set up of the chicken button
+  // https://editor.p5js.org/allison.parrish/sketches/SJfPwGBab 
+  buttonChicken = createButton('Chicken : $250');
+  buttonChicken.style("font-weight", "bold"); 
+  buttonChicken.size(200, 50);
+  buttonChicken.position(width / 2.5, height / 3.5);
+  buttonChicken.mousePressed(chickenTrue);
+  buttonChicken.mousePressed(chickens);
+  // setup of the pig button 
+  buttonPig = createButton('Pig : $800');
+  buttonPig.style("font-weight", "bold"); 
+  buttonPig.size(200, 50);
+  buttonPig.position(width / 2.5, height / 2.5);
+  buttonPig.mousePressed(pigTrue);
+  buttonPig.mousePressed(pigs);
+}
+
+// sets up the game
+function draw() {
+  background(grassBg);
+  animalButton();
+  // game conditions
+  if (game === 'start') {
+    startPage();
+  }if (game === 'playing') {
+    truckTeleportRanch();
+    updateTimers();
+    dollas()
+    keyReleased();
+    for (let i = 0; i < Chickens.length; i++) {
+      Chickens[i].update();
+      Chickens[i].display();
+    }
+    for (let i = 0; i < Pigs.length; i++) {
+      Pigs[i].update();
+      Pigs[i].display();
+     }
+    for (let i = 0; i < cropsArray.length; i++) {
+      let cropPos = cropsArray[i];
+      image(crop, cropPos.x, cropPos.y, squareSize, squareSize);
+    }
+    penn()
+    movement(); 
+  }if (game === 'info') {
+    infoPage();
+  }if (game === 'shop') {
+    shopPage();
+    backButton();
+  }
+  if (game === ranch) {
+    Pond(); 
+    truckTeleportfarm();
+    Shack();
+    movement();
+    shackPage();
+  }
+  if (game === 'shop') {
+    dropdown.show();
+  }
+}
+
+// start the game
+function start() {
+  // Change game state to 'playing' when Start button is clicked
+  game = 'playing';
+  buttonS.remove(); 
+  buttonI.remove();
+}
+
+// money
+function dollas() {
+  // shows your money
+  textSize(windowWidth/20);
+  text('$' + money,windowWidth/5, windowHeight/15);
+}
+
+// the start button
+function startButton(){
+  buttonS = createButton('Start');
+  buttonS.style("font-size", "32px");
+  buttonS.style("font-weight", "bold"); 
+  buttonS.size(200, 50);
+  buttonS.position(windowWidth / 2.6, windowHeight / 2);
+  buttonS.mousePressed(start);
+}
+// the how to play button
+function infoButton() {
+  buttonI = createButton('How to play');
+  buttonI.style("font-size", "32px");
+  buttonI.style("font-weight", "bold"); 
+  buttonI.size(200, 50);
+  buttonI.position(windowWidth / 2.6, windowHeight / 1.7);
+  buttonI.mousePressed(infoPage);
+}
+// the back button
+function backButton(){
+  // this makes the barn work
+  buttonS.mousePressed(game = 'playing'); 
+}
+// shows the animal buttons in the barn
+function animalButton() {
+  if (game === 'shop') {
+    // shows the animal buttons
+    buttonChicken.show();
+    buttonPig.show();
+  } else {
+    // hides the animal buttons
+    buttonChicken.hide(); 
+    buttonPig.hide();
+  }
+}
+
+// this is the start page
+function startPage() {
+  // startig text 
+  textAlign(CENTER);
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Welcome! Click "Start" to play', width / 2, height / 2 - 50);
+} 
+// how to play page
+function infoPage(){
+  game = 'info';
+  buttonI.remove();
+  buttonS.position(windowWidth / 1.7, windowHeight / 1.23);
+  image(scroll, -windowWidth/6, -windowHeight/9, windowWidth + windowWidth/3, windowHeight*1.2);
+  // text stuff
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Instructions', width / 2, height / 8);
+  textSize(windowWidth/50);
+  // instructions
+  text('Use WASD or the arrow keys to control your character', width / 2, height / 3.5);
+  text('To plant crops stand on the dirt patch and press "c"', width / 2, height / 3);
+  text('To harvest crops stand on the dirt patch and press "v"', width / 2, height / 2.6);
+  text('To buy animals walk up to the barn doors and select from menu', width / 2, height / 2.32);
+  text('To go to ranch walk into the truck', width / 2, height / 2.1);
+}
+// the barn shop
+function shopPage() {
+  image(scroll, -windowWidth/6, -windowHeight/9, windowWidth + windowWidth/3, windowHeight*1.2);
+  // the text
+  textSize(windowWidth/20);
+  textStyle(BOLD);
+  fill(0);
+  text('Shop', width / 2, height / 8);
+  // the pig and chicken buttons 
+  animalButton();
+}
+// the fish shack page 
+function shackPage() {
+  // where your character is to pop up the page 
+  if (x > windowWidth/7 && x < windowWidth / 4.5 && y < windowHeight/8.4 + squareSize ) {
+    image(scroll, -windowWidth/6, -windowHeight/9, windowWidth + windowWidth/3, windowHeight*1.2);
+    // the text
+    textSize(windowWidth/20);
+    textStyle(BOLD);
+    fill(0);
+    text('Sell Fish', width / 2, height / 8);
+    // shows the sell fish button
+    animalButton();
+  }  
+}
+
+
+
+// teleport truck
+function truckTeleportRanch() {
+  // the image of the truck
+  image(truck, windowWidth - windowWidth/6, windowHeight - windowHeight/3, windowWidth/6, windowHeight/3);
+  // if the character is within the truck boundaries 
+  if ( x > windowWidth - windowWidth/4.5 && y > windowHeight - windowHeight/2.3) { 
+    game = ranch;
+  }
+}
+function truckTeleportfarm() {
+  // truck image 
+  image(truck, windowWidth - windowWidth/6, windowWidth/95, windowWidth/6, windowHeight/3);
+  // if the character is within the truck boundaries 
+  if ( x > windowWidth - windowWidth/4.5 && y < windowHeight/3.5) { 
+    game = 'playing'; 
+  }
+  // places the character beside the truck when it teleports
+  if ( x > windowWidth - windowWidth/4.5 && y < windowHeight/3.5) { 
+    y = windowWidth - squareSize
+    x = windowWidth/1.4 
+  }
+}
+
+// the crop functions
+//https://editor.p5js.org/marynotari/sketches/S1T2ZTMp- 
+function updateTimers() {
+  // if theres no crops 
+  if (cropsArray.length > 0) {
+    // the timer on the screen
+    text(timer, width / 2.3, height / 1.6);
+    // this is the seconds
+    if (frameCount % 60 === 0 && timer > 0) {
+      timer--;
+    }
+    // if the timers at zero
+    if (timer === 0) {
+      // says your crops are ready
+      text("Crops ready", width / 6, height / 1.8);
+    }
+  }
+}
+function removeCrops() {
+  if (timer === 0) {
+    for (let i = cropsArray.length - 1; i >= 0; i--) {
+      cropsArray.splice(i); 
+      money = int(money + 2);
+      timer = 30;
+    }
+  }
+}
+function keyReleased() {
+  // the crop image
+  image(dirt, 0, height/1.7, width / 2.5, height / 2.5);
+  // plants the crop and puts it on the crop list
+  if (key === 'c' || key === 'C') {
+    if (x > 0 && x < width / 3 && y > windowHeight/2) {
+      let cropPos = { x: x, y: y };
+      cropsArray.push(cropPos);
+    }
+  }
+  // removes the crops when the timers ready
+  if (x > 0 && x < width / 3 && y > windowWidth/3) {
+    if (key === 'v' || key === 'V') {
+      // removes the crops
+      removeCrops();
+    }
+  }
+}
+
+// the fish shack
+function Shack() {
+  // the shack image
+  image(shack, 0, - windowHeight/10, windowWidth/2, windowHeight/1.8);
+  // boundaries for the shack
+  if (x < windowWidth/2.7 && y < windowHeight/8.5 + squareSize ) {
+      y =  windowHeight/8.5 + squareSize;       
+    }else{
+    if (x < windowWidth/2.5 && y < windowHeight/8.7 + squareSize ) {
+      x = windowWidth/2.5;        
+    }
+  }
+}
+// the pond and fishing and doc
+function Pond() {
+  // these are the images for the pond and doc 
+  image(pond, windowWidth - windowWidth/2, windowHeight - windowHeight/3, windowWidth/2, windowHeight/3);
+  image (doc, windowWidth - windowWidth/1.7, windowHeight/1.3, windowWidth/3, windowHeight/4);
+  // this is to teleport the character from where he is to near the truck
+  if (x > windowWidth - windowWidth/3 && y > windowHeight - windowHeight/2.6 ){
+    // these are the x and y positions near the truck
+    x = windowWidth/1.4;
+    y = windowHeight/7;
+  }
+  // this shows the fishing rod and makes the player catch fish at random
+  if (y < windowHeight && y > windowHeight / 1.4 && x > windowWidth/1.7 ){
+    // rod image 
+    image(rod, x + squareSize/1.5, y - squareSize/3, squareSize, squareSize);
+    // catching fish at ramdom
+    fishCatch = random(0,500);
+    // shows the image of the fish 
+    if (fishCatch < 5) {
+      image(redFishy, x + squareSize, y + squareSize/5 , squareSize, squareSize)
+      // adds the fish to the fish list
+      fishes = fishes + 1;
+    }
+  }
+  // keeps the character from going in the pond
+  if (x > windowWidth - windowWidth/2.9 && y > windowHeight - windowHeight/2.6 ){
+    x = windowWidth - windowWidth/2.9;
+  }
+  // this keeps the player out of the pond 
+  if (x > windowWidth - windowWidth/3 && y > windowHeight - windowHeight/2.5 ){
+    y = windowHeight - windowHeight/2.5;
+  }
+  // is the outside of the doc rope
+  if (x > windowWidth - windowWidth/1.5 && y > windowHeight - windowHeight/3 && y < windowHeight - windowHeight/3.1 ){
+    y = windowHeight - windowHeight/3;
+  }
+  // is the inside of the doc rope
+  if (x > windowWidth - windowWidth/1.5 && y > windowHeight - windowHeight/3.1 && y < windowHeight - windowHeight/4 ){
+    y = windowHeight - windowHeight/4;
+  }
+}    
+// the animal pens and the shop in the barn
+function penn() {
+  // animal pens and barn image
+  image(pen, windowWidth/3.2, windowHeight/12.6, windowWidth/2.7, windowHeight/3.5);
+  image(pen, 0, windowHeight/12.6, windowWidth/2.7, windowHeight/3.5);
+  image(house, windowWidth/1.5, 1, windowWidth/2.7, windowHeight/2.7);
+  // pen and barn boundaries
+  if (y < windowHeight/2.5 - squareSize ) {
+      y = windowHeight/2.5 - squareSize;
+  }
+  // brings up the shop page if at the barn doors
+  if (x > windowWidth/1.4 && x < windowWidth/1.1 && y < windowHeight/2.4 - squareSize  ) {
+    game = 'shop';
+  }
+}
+
+// character movement 
+function movement() {
+  // farmers image
+  image(displayFarmer, x, y, squareSize, squareSize); 
+  // changes the farmers image anf direction based on what key is pressed 
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
+    y -= speed;
+    displayFarmer = littleFarmerB;
+  }if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
+    y += speed;
+    displayFarmer = littleFarmerF;
+  }if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+    x -= speed;
+    displayFarmer = littleFarmerL;
+  }if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+    x += speed;
+    displayFarmer = littleFarmerR;
+  }
+  // the bouds of the farmer so the character does not go off screen 
+  if (x < 1){
+    x = 1
+  }if (x > windowWidth - squareSize ){
+    x = windowWidth - squareSize
+  }if (y < 1){
+    y = 1
+  }if (y > windowHeight - squareSize ){
+    y = windowHeight - squareSize
+  }
+}
+
+// animals
+// chickens in the pen
+class Chicken {
+  constructor() {
+    // chickens x and y
+    this.x = windowWidth/2.5;
+    this.y = windowHeight/7.5; 
+    // chickens speed
+    this.speedX = random(-1, 1); 
+    this.speedY = random(-1, 1); 
+    // chickens size
+    this.size = random(windowWidth/15, windowWidth/50);
+  }
+
+  update() {
+    // chickens movement
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    // Bounce off the edges
+    if (this.x <= windowWidth/2.9 || this.x >= width/1.65) {
+      this.speedX *= -1;
+    }
+    if (this.y <= windowHeight/9 || this.y >= windowHeight/3.2) {
+      this.speedY *= -1;
+    }
+  }
+
+  display() {
+    // if the chicken button was pressed
+    if (chickenCheck = true) {
+      // spawn chicken 
+      image(chicken,this.x, this.y, this.size, this.size);
+      // change it back to false for next time
+      chickenCheck = false;
+    }
+  }
+}
+// chicken money
+function chickens() {
+  // takes away the ammount the chicken cost
+  if (chickenCheck = true) {
+    if (money >= 250){
+      let newChicken = new Chicken();
+      Chickens.push(newChicken);
+      money = money - 250
+    }
+  }
+}
+// checks the chicken
+function chickenTrue() {
+  chickenCheck = true;
+}
+
+// pigs in the pen
+class Pig {
+  constructor() {
+    // spawn point
+    this.x = windowWidth/9;
+    this.y = windowHeight/7.5; 
+    // speed
+    this.speedX = random(-1, 1); 
+    this.speedY = random(-1, 1); 
+    // size
+    this.size = random(windowWidth/15, windowWidth/50);
+  }
+  
+  // movement
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    // Bounce off the edges
+    if (this.x <= windowWidth/40 || this.x >= width/3.5) {
+      this.speedX *= -1;
+    }
+    if (this.y <= windowHeight/9 || this.y >= windowHeight/3.2) {
+      this.speedY *= -1;
+    }
+  }
+
+  display() {
+    // checks if pig button was pressed
+    if (pigCheck = true) {
+      // pigs image
+      image(pig,this.x, this.y, this.size, this.size);
+      // changes back to false
+      pigCheck = false;
+    }
+  }
+}
+// pig money
+function pigs() {
+  // takes away the money th pig cost
+  if (pigCheck = true) {
+    if (money >= 800){
+      let newPig = new Pig();
+      Pigs.push(newPig);
+      money = money - 800
+    }
+  }
+}
+// checks the pig
+function pigTrue() {
+  pigCheck = true;
+}
+
+
+
+
